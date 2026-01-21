@@ -1,0 +1,6 @@
+{
+  "name": "三亚长丰燃气",
+  "domains": ["sycfgas"],
+  "homeassistant": "2024.1.0",
+  "iot_class": "Cloud Polling"
+}

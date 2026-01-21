@@ -35,16 +35,10 @@
 ## 配置说明
 
 ### 获取 meterUUID 和 userToken
+电脑Reqable，微信小程序，然后找到如图的数据
 
-1. 打开微信小程序或网页版的三亚长丰燃气自助服务平台
-2. 登录您的账户
-3. 打开浏览器开发者工具（F12）
-4. 在 **Network**（网络）标签中，找到以下 API 请求：
-   - `/prod-api/acct/queryAcctInfo` - 查询账户信息
-   - `/prod-api/query/iotUsage` - 查询用气量
-5. 从请求参数中获取：
-   - `meterUUID` 或 `meterUuid`：燃气表 UUID
-   - `userToken`：用户令牌
+<img width="1120" height="568" alt="ScreenShot_2026-01-21_144100_760" src="https://github.com/user-attachments/assets/20024bd2-fdac-4e48-956b-3e7b3d8f6419" />
+
 
 ### 配置步骤
 

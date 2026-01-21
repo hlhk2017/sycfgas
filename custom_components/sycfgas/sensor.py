@@ -62,6 +62,9 @@ async def async_setup_entry(
     # Add payment record sensor
     entities.append(SycfgasPaymentSensor(coordinator, entry))
 
+    # Add recent daily usage sensor
+    entities.append(SycfgasRecentDailyUsageSensor(coordinator, entry))
+
     # Add monthly usage sensors for last 12 months
     current_date = datetime.now()
     for i in range(12):
@@ -269,6 +272,120 @@ class SycfgasMonthlyUsageSensor(SycfgasBaseSensor):
             "daily_breakdown": daily_breakdown,
             "industry_type": result.get("industryType", 0),
         }
+
+
+class SycfgasRecentDailyUsageSensor(SycfgasBaseSensor):
+    """Sensor for recent daily gas usage."""
+
+    _attr_unique_id = "sycfgas_recent_daily_usage"
+    _attr_name = "最近一天用气量"
+    _attr_native_unit_of_measurement = UnitOfVolume.CUBIC_METERS
+    _attr_icon = "mdi:fire"
+    _attr_state_class = SensorStateClass.MEASUREMENT
+
+    def __init__(
+        self,
+        coordinator: SycfgasCoordinator,
+        entry: ConfigEntry,
+    ) -> None:
+        """Initialize the recent daily usage sensor."""
+        super().__init__(coordinator, entry)
+        self._attr_unique_id = f"{coordinator.meter_uuid}_recent_daily_usage"
+
+    @property
+    def native_value(self) -> float | None:
+        """Return the most recent daily usage."""
+        data = self.coordinator.data or {}
+        monthly_data = data.get("monthly_data", {})
+        
+        # Get current month and previous months to find the most recent data
+        current_date = datetime.now()
+        recent_usage = None
+        recent_date = None
+        
+        # Check last 3 months to find the most recent day with data
+        for i in range(3):
+            date = current_date - relativedelta(months=i)
+            year_month = date.strftime("%Y-%m")
+            month_data = monthly_data.get(year_month, {})
+            result = month_data.get("result", {})
+            usage_data = result.get("data", [])
+            
+            if usage_data and len(usage_data) > 0:
+                # Sort by readingTime descending to get most recent first
+                sorted_days = sorted(
+                    usage_data,
+                    key=lambda x: x.get("readingTime", ""),
+                    reverse=True
+                )
+                
+                # Find the most recent day with valid volume
+                for day_data in sorted_days:
+                    volume = day_data.get("cycleTotalVolume", "0.0")
+                    reading_time = day_data.get("readingTime", "")
+                    try:
+                        vol_float = float(volume)
+                        if vol_float > 0:
+                            # Check if this is more recent than what we found
+                            if recent_date is None or reading_time > recent_date:
+                                recent_usage = vol_float
+                                recent_date = reading_time
+                                break
+                    except (ValueError, TypeError):
+                        continue
+        
+        return recent_usage if recent_usage is not None else None
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        """Return extra state attributes with recent daily details."""
+        data = self.coordinator.data or {}
+        monthly_data = data.get("monthly_data", {})
+        
+        # Get current month and previous months to find the most recent data
+        current_date = datetime.now()
+        recent_day_data = None
+        recent_date = None
+        
+        # Check last 3 months to find the most recent day with data
+        for i in range(3):
+            date = current_date - relativedelta(months=i)
+            year_month = date.strftime("%Y-%m")
+            month_data = monthly_data.get(year_month, {})
+            result = month_data.get("result", {})
+            usage_data = result.get("data", [])
+            
+            if usage_data and len(usage_data) > 0:
+                # Sort by readingTime descending to get most recent first
+                sorted_days = sorted(
+                    usage_data,
+                    key=lambda x: x.get("readingTime", ""),
+                    reverse=True
+                )
+                
+                # Find the most recent day with valid volume
+                for day_data in sorted_days:
+                    volume = day_data.get("cycleTotalVolume", "0.0")
+                    reading_time = day_data.get("readingTime", "")
+                    try:
+                        vol_float = float(volume)
+                        if vol_float > 0:
+                            # Check if this is more recent than what we found
+                            if recent_date is None or reading_time > recent_date:
+                                recent_day_data = day_data
+                                recent_date = reading_time
+                                break
+                    except (ValueError, TypeError):
+                        continue
+        
+        if recent_day_data:
+            return {
+                "reading_time": recent_day_data.get("readingTime", ""),
+                "volume": float(recent_day_data.get("cycleTotalVolume", "0.0")),
+                "bill_amount": float(recent_day_data.get("billAmt", "0.0")),
+            }
+        
+        return {}
 
 
 class SycfgasPaymentSensor(SycfgasBaseSensor):

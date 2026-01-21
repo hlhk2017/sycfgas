@@ -1,0 +1,11 @@
+{
+  "domain": "sycfgas",
+  "name": "三亚长丰燃气",
+  "codeowners": ["@custom"],
+  "config_flow": true,
+  "dependencies": ["http"],
+  "documentation": "https://github.com/custom/sycfgas",
+  "iot_class": "cloud_polling",
+  "requirements": ["aiohttp>=3.8.0", "python-dateutil>=2.8.0"],
+  "version": "1.0.0"
+}

@@ -1,6 +1,9 @@
 # 三亚长丰燃气 Home Assistant 集成
 # 本集成由AI生成，使用了Cusor
 这是一个用于 Home Assistant 的自定义集成，用于查询和监控三亚长丰海洋天然气供气有限公司的燃气使用情况、账户余额和缴费记录。
+## 配置界面
+<img width="457" height="379" alt="image" src="https://github.com/user-attachments/assets/7fb54dfc-9cb8-4d07-a5aa-53f68b4d7dc1" />
+
 ## 效果如图：
 <img width="824" height="994" alt="image" src="https://github.com/user-attachments/assets/399cc055-3565-459e-bd83-1c27bd19fd2d" />
 
